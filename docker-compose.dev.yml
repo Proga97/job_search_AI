@@ -1,0 +1,35 @@
+services:
+  meow-ai:
+    build:
+      target: development
+    image: meow-ai-dev
+    working_dir: /app
+    command:
+      - sh
+      - -c
+      - npm --workspace orchestrator run db:migrate && npm --workspace orchestrator run dev
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      APPLY_ASSISTANT_URL: ${APPLY_ASSISTANT_URL:-http://host.docker.internal:4317}
+      APPLY_ASSISTANT_TOKEN: ${APPLY_ASSISTANT_TOKEN:-}
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./orchestrator:/app/orchestrator
+      - orchestrator-node-modules:/app/orchestrator/node_modules
+      - ./shared:/app/shared
+      - ./career-boards:/app/career-boards
+      - ./visa-sponsor-providers:/app/visa-sponsor-providers
+      - ./extractors:/app/extractors
+      - ./data:/app/data
+      - codex-home:/app/codex-home
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  orchestrator-node-modules:
