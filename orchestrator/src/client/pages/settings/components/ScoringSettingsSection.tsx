@@ -7,7 +7,36 @@ import type React from "react";
 import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+
+const RUBRIC_FIELDS = [
+  {
+    key: "skills",
+    label: "Skills match",
+    hint: "Technologies, frameworks, and languages",
+  },
+  {
+    key: "experience",
+    label: "Experience level",
+    hint: "Seniority and required years",
+  },
+  {
+    key: "location",
+    label: "Location alignment",
+    hint: "Remote, hybrid, and location fit",
+  },
+  {
+    key: "domain",
+    label: "Industry fit",
+    hint: "Relevant product and domain experience",
+  },
+  {
+    key: "growth",
+    label: "Career growth",
+    hint: "Role trajectory and learning potential",
+  },
+] as const;
 
 type ScoringSettingsSectionProps = {
   values: ScoringValues;
@@ -30,6 +59,7 @@ export const ScoringSettingsSection: React.FC<ScoringSettingsSectionProps> = ({
   layoutMode,
 }) => {
   const {
+    scoringRubric,
     penalizeMissingSalary,
     missingSalaryPenalty,
     autoSkipScoreThreshold,
@@ -47,6 +77,11 @@ export const ScoringSettingsSection: React.FC<ScoringSettingsSectionProps> = ({
   const currentAutoSkipThreshold = watch("autoSkipScoreThreshold");
   const blockedCompanyKeywordValues =
     watch("blockedCompanyKeywords") ?? blockedCompanyKeywords.default;
+  const currentRubric = watch("scoringRubric") ?? scoringRubric.default;
+  const rubricTotal = Object.values(currentRubric).reduce(
+    (total, value) => total + (typeof value === "number" ? value : 0),
+    0,
+  );
 
   return (
     <SettingsSectionFrame
@@ -55,6 +90,91 @@ export const ScoringSettingsSection: React.FC<ScoringSettingsSectionProps> = ({
       value="scoring"
     >
       <div className="space-y-4">
+        <div className="space-y-3">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <h3 className="text-sm font-semibold tracking-tight">
+                Scoring rubric
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Set how much each signal contributes to the AI suitability
+                score.
+              </p>
+            </div>
+            <div
+              className={`shrink-0 font-mono text-xs tabular-nums ${
+                rubricTotal === 100 ? "text-foreground" : "text-destructive"
+              }`}
+            >
+              {rubricTotal} / 100
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-xl border border-border/80 bg-background">
+            {RUBRIC_FIELDS.map((item, index) => (
+              <div
+                key={item.key}
+                className={`grid grid-cols-[minmax(0,1fr)_5rem] items-center gap-4 px-4 py-3 ${
+                  index > 0 ? "border-t border-border/70" : ""
+                }`}
+              >
+                <div className="min-w-0">
+                  <label
+                    htmlFor={`scoring-rubric-${item.key}`}
+                    className="text-sm font-medium"
+                  >
+                    {item.label}
+                  </label>
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                    {item.hint}
+                  </p>
+                </div>
+                <Controller
+                  name={`scoringRubric.${item.key}`}
+                  control={control}
+                  render={({ field }) => (
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        id={`scoring-rubric-${item.key}`}
+                        type="number"
+                        inputMode="numeric"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={field.value ?? 0}
+                        onChange={(event) => {
+                          const parsed = Number.parseInt(
+                            event.target.value,
+                            10,
+                          );
+                          field.onChange(
+                            Number.isNaN(parsed)
+                              ? 0
+                              : Math.min(100, Math.max(0, parsed)),
+                          );
+                        }}
+                        disabled={isLoading || isSaving}
+                        className="h-9 pr-7 text-right font-mono tabular-nums shadow-none"
+                      />
+                      <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                        pt
+                      </span>
+                    </div>
+                  )}
+                />
+              </div>
+            ))}
+          </div>
+          {rubricTotal !== 100 && (
+            <p className="text-xs font-medium text-destructive">
+              Adjust the weights so the total equals 100 before saving.
+            </p>
+          )}
+        </div>
+
+        <Separator />
+
         {/* Enable penalty toggle */}
         <div className="flex items-start space-x-3">
           <Controller

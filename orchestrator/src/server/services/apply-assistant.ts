@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import {
   notFound,
   requestTimeout,
@@ -9,6 +10,8 @@ import {
 import { logger } from "@infra/logger";
 import { requireTenantId } from "@infra/request-context";
 import { getJobById } from "@server/repositories/jobs";
+import { generateDesignResumePdf, getPdfPath } from "@server/services/pdf";
+import { getTenantDesignResumePdfPath } from "@server/services/pdf-storage";
 import { getProfile } from "@server/services/profile";
 import type { ResumeProfile } from "@shared/types";
 
@@ -38,8 +41,32 @@ function companionHeaders(): Record<string, string> {
   return headers;
 }
 
+function structuredLocation(
+  location: NonNullable<ResumeProfile["basics"]>["location"],
+) {
+  const address = location?.address?.trim();
+  if (!address) return location ?? {};
+  if (location?.city || location?.region || location?.postalCode) {
+    return location;
+  }
+
+  const usAddress = address.match(
+    /^(.+?),\s*([^,]+?),\s*([A-Za-z .]+?)\s+(\d{5}(?:-\d{4})?)(?:,\s*(?:USA|US|United States))?$/i,
+  );
+  if (!usAddress) return location ?? {};
+
+  return {
+    address: usAddress[1]?.trim(),
+    city: usAddress[2]?.trim(),
+    region: usAddress[3]?.trim(),
+    postalCode: usAddress[4]?.trim(),
+    countryCode: "US",
+  };
+}
+
 function profilePayload(profile: ResumeProfile) {
   const basics = profile.basics ?? {};
+  const location = structuredLocation(basics.location);
   const social = new Map(
     (basics.profiles ?? []).map((entry) => [
       entry.network?.toLowerCase(),
@@ -53,12 +80,23 @@ function profilePayload(profile: ResumeProfile) {
     website: basics.url,
     linkedIn: social.get("linkedin"),
     github: social.get("github"),
-    address: basics.location?.address,
-    city: basics.location?.city,
-    region: basics.location?.region,
-    postalCode: basics.location?.postalCode,
-    country: basics.location?.countryCode,
+    address: location.address,
+    city: location.city,
+    region: location.region,
+    postalCode: location.postalCode,
+    country: location.countryCode,
   };
+}
+
+async function resumePayload(jobId: string, hasJobResume: boolean) {
+  let path = hasJobResume ? getPdfPath(jobId) : getTenantDesignResumePdfPath();
+  try {
+    return (await readFile(path)).toString("base64");
+  } catch {
+    await generateDesignResumePdf();
+    path = getTenantDesignResumePdfPath();
+    return (await readFile(path)).toString("base64");
+  }
 }
 
 async function companionFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -131,6 +169,11 @@ export async function launchApplyAssistant(
       jobId,
       url: url.toString(),
       profile: profilePayload(await getProfile()),
+      resume: {
+        fileName: "Pranay_Chimmani_Resume.pdf",
+        mimeType: "application/pdf",
+        dataBase64: await resumePayload(jobId, Boolean(job.pdfPath)),
+      },
     }),
   });
   logger.info("Apply Assistant opened job for review", {

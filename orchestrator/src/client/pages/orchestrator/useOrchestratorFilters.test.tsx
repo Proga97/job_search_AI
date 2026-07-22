@@ -6,121 +6,141 @@ import { DEFAULT_SORT } from "./constants";
 import { useOrchestratorFilters } from "./useOrchestratorFilters";
 
 const createWrapper = (initialEntry: string) => {
-	let latestLocation = "";
+  let latestLocation = "";
 
-	const LocationWatcher = () => {
-		const location = useLocation();
-		latestLocation = location.pathname + location.search;
-		return null;
-	};
+  const LocationWatcher = () => {
+    const location = useLocation();
+    latestLocation = location.pathname + location.search;
+    return null;
+  };
 
-	const Wrapper = ({ children }: { children: ReactNode }) => (
-		<MemoryRouter initialEntries={[initialEntry]}>
-			<LocationWatcher />
-			{children}
-		</MemoryRouter>
-	);
-	Wrapper.displayName = "RouterWrapper";
-	return { Wrapper, getLocation: () => latestLocation };
+  const Wrapper = ({ children }: { children: ReactNode }) => (
+    <MemoryRouter initialEntries={[initialEntry]}>
+      <LocationWatcher />
+      {children}
+    </MemoryRouter>
+  );
+  Wrapper.displayName = "RouterWrapper";
+  return { Wrapper, getLocation: () => latestLocation };
 };
 
 describe("useOrchestratorFilters", () => {
-	it("round-trips the minimum score filter", () => {
-		const { Wrapper, getLocation } = createWrapper("/discovered");
-		const { result } = renderHook(() => useOrchestratorFilters(), {
-			wrapper: Wrapper,
-		});
+  it("defaults the posted filter to the last 24 hours", () => {
+    const { Wrapper } = createWrapper("/discovered");
+    const { result } = renderHook(() => useOrchestratorFilters(), {
+      wrapper: Wrapper,
+    });
 
-		act(() => result.current.setMinimumScore(80));
-		expect(result.current.minimumScore).toBe(80);
-		expect(getLocation()).toContain("minScore=80");
-	});
+    expect(result.current.postedWithinDays).toBe(1);
+  });
 
-	it("parses a valid sort query param", () => {
-		const { Wrapper } = createWrapper("/ready?sort=datePosted-asc");
-		const { result } = renderHook(() => useOrchestratorFilters(), {
-			wrapper: Wrapper,
-		});
+  it("allows the default posted filter to be cleared", () => {
+    const { Wrapper, getLocation } = createWrapper("/discovered");
+    const { result } = renderHook(() => useOrchestratorFilters(), {
+      wrapper: Wrapper,
+    });
 
-		expect(result.current.sort).toEqual({
-			key: "datePosted",
-			direction: "asc",
-		});
-	});
+    act(() => result.current.setPostedWithinDays(null));
+    expect(result.current.postedWithinDays).toBeNull();
+    expect(getLocation()).toContain("postedWithin=all");
+  });
 
-	it("falls back to default sort for invalid sort query params", () => {
-		const cases = [
-			"/ready?sort=title",
-			"/ready?sort=invalid-asc",
-			"/ready?sort=title-sideways",
-		];
+  it("round-trips the minimum score filter", () => {
+    const { Wrapper, getLocation } = createWrapper("/discovered");
+    const { result } = renderHook(() => useOrchestratorFilters(), {
+      wrapper: Wrapper,
+    });
 
-		for (const entry of cases) {
-			const { Wrapper } = createWrapper(entry);
-			const { result } = renderHook(() => useOrchestratorFilters(), {
-				wrapper: Wrapper,
-			});
-			expect(result.current.sort).toEqual(DEFAULT_SORT);
-		}
-	});
+    act(() => result.current.setMinimumScore(80));
+    expect(result.current.minimumScore).toBe(80);
+    expect(getLocation()).toContain("minScore=80");
+  });
 
-	it("parses date filter params", () => {
-		const { Wrapper } = createWrapper(
-			"/all?date=ready,applied&appliedRange=30&appliedStart=2026-03-10&appliedEnd=2026-04-08",
-		);
-		const { result } = renderHook(() => useOrchestratorFilters(), {
-			wrapper: Wrapper,
-		});
+  it("parses a valid sort query param", () => {
+    const { Wrapper } = createWrapper("/ready?sort=datePosted-asc");
+    const { result } = renderHook(() => useOrchestratorFilters(), {
+      wrapper: Wrapper,
+    });
 
-		expect(result.current.dateFilter).toEqual({
-			dimensions: ["ready", "applied"],
-			startDate: "2026-03-10",
-			endDate: "2026-04-08",
-			preset: "30",
-		});
-	});
+    expect(result.current.sort).toEqual({
+      key: "datePosted",
+      direction: "asc",
+    });
+  });
 
-	it("round-trips multiple sponsorship statuses", () => {
-		const { Wrapper, getLocation } = createWrapper("/discovered");
-		const { result } = renderHook(() => useOrchestratorFilters(), {
-			wrapper: Wrapper,
-		});
+  it("falls back to default sort for invalid sort query params", () => {
+    const cases = [
+      "/ready?sort=title",
+      "/ready?sort=invalid-asc",
+      "/ready?sort=title-sideways",
+    ];
 
-		act(() => {
-			result.current.setSponsorFilter(["available", "sponsor_listed"]);
-		});
+    for (const entry of cases) {
+      const { Wrapper } = createWrapper(entry);
+      const { result } = renderHook(() => useOrchestratorFilters(), {
+        wrapper: Wrapper,
+      });
+      expect(result.current.sort).toEqual(DEFAULT_SORT);
+    }
+  });
 
-		expect(result.current.sponsorFilter).toEqual([
-			"available",
-			"sponsor_listed",
-		]);
-		expect(getLocation()).toContain("sponsor=available%2Csponsor_listed");
-	});
+  it("parses date filter params", () => {
+    const { Wrapper } = createWrapper(
+      "/all?date=ready,applied&appliedRange=30&appliedStart=2026-03-10&appliedEnd=2026-04-08",
+    );
+    const { result } = renderHook(() => useOrchestratorFilters(), {
+      wrapper: Wrapper,
+    });
 
-	it("round-trips date filter params and resets them", () => {
-		const { Wrapper, getLocation } = createWrapper("/all");
-		const { result } = renderHook(() => useOrchestratorFilters(), {
-			wrapper: Wrapper,
-		});
+    expect(result.current.dateFilter).toEqual({
+      dimensions: ["ready", "applied"],
+      startDate: "2026-03-10",
+      endDate: "2026-04-08",
+      preset: "30",
+    });
+  });
 
-		act(() => {
-			result.current.setDateFilter({
-				dimensions: ["ready", "closed"],
-				startDate: "2026-04-01",
-				endDate: "2026-04-08",
-				preset: "custom",
-			});
-		});
+  it("round-trips multiple sponsorship statuses", () => {
+    const { Wrapper, getLocation } = createWrapper("/discovered");
+    const { result } = renderHook(() => useOrchestratorFilters(), {
+      wrapper: Wrapper,
+    });
 
-		expect(getLocation()).toContain("date=ready%2Cclosed");
-		expect(getLocation()).toContain("appliedStart=2026-04-01");
-		expect(getLocation()).toContain("appliedEnd=2026-04-08");
-		expect(getLocation()).toContain("appliedRange=custom");
+    act(() => {
+      result.current.setSponsorFilter(["available", "sponsor_listed"]);
+    });
 
-		act(() => {
-			result.current.resetFilters();
-		});
+    expect(result.current.sponsorFilter).toEqual([
+      "available",
+      "sponsor_listed",
+    ]);
+    expect(getLocation()).toContain("sponsor=available%2Csponsor_listed");
+  });
 
-		expect(getLocation()).toBe("/all");
-	});
+  it("round-trips date filter params and resets them", () => {
+    const { Wrapper, getLocation } = createWrapper("/all");
+    const { result } = renderHook(() => useOrchestratorFilters(), {
+      wrapper: Wrapper,
+    });
+
+    act(() => {
+      result.current.setDateFilter({
+        dimensions: ["ready", "closed"],
+        startDate: "2026-04-01",
+        endDate: "2026-04-08",
+        preset: "custom",
+      });
+    });
+
+    expect(getLocation()).toContain("date=ready%2Cclosed");
+    expect(getLocation()).toContain("appliedStart=2026-04-01");
+    expect(getLocation()).toContain("appliedEnd=2026-04-08");
+    expect(getLocation()).toContain("appliedRange=custom");
+
+    act(() => {
+      result.current.resetFilters();
+    });
+
+    expect(getLocation()).toBe("/all");
+  });
 });

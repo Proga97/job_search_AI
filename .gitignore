@@ -31,3 +31,4 @@ tmp/
 
 # Runtime storage artifacts
 orchestrator/storage
+apply-assistant/.data/

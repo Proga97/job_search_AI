@@ -222,6 +222,7 @@ Readiness requires:
 
 - Penalize missing salary data
 - Set penalty amount
+- Adjust the five scoring rubric weights for skills, experience, location, industry fit, and career growth. The weights must total 100.
 - Optional auto-skip threshold for low-score jobs
 - Block jobs from companies that match configured keyword tokens
 
