@@ -31,7 +31,8 @@ import { apiRouter } from "./api/index";
 import { resolveTracerRedirect } from "./services/tracer-links";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const UMAMI_UPSTREAM_ORIGIN = "https://umami.dakheera47.com";
+const UMAMI_UPSTREAM_ORIGIN =
+  process.env.JOBOPS_UMAMI_HOST_URL?.trim() ?? "http://localhost";
 const UMAMI_PROXY_TIMEOUT_MS = 5_000;
 const HOP_BY_HOP_RESPONSE_HEADERS = new Set([
   "connection",
@@ -64,7 +65,7 @@ const ALLOWED_UMAMI_PROXY_METHODS = new Map<string, string[]>([
 ]);
 const ANALYTICS_DISABLED_TRUTHY_VALUES = new Set(["1", "true", "yes", "on"]);
 const UMAMI_SCRIPT_PATTERN =
-  /\s*<script\s+defer\s+src="https:\/\/umami\.dakheera47\.com\/script\.js"\s+data-website-id="0dc42ed1-87c3-4ac0-9409-5a9b9588fe66"\s*><\/script>/;
+  /\s*<script\s+defer\s+src="[^"]+\/script\.js"[^>]*><\/script>/;
 const OPENPANEL_SCRIPT_PATTERN =
   /\s*<script>\s*window\.op =[\s\S]*?window\.op\("init", \{[\s\S]*?\n\s*}\);\s*<\/script>\s*<script src="https:\/\/openpanel\.dev\/op1\.js" defer async><\/script>/;
 

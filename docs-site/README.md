@@ -27,14 +27,14 @@ Build output:
 Set these environment variables for deploys:
 
 - `DOCS_SITE_URL`: Public origin for canonical/sitemap URLs.
-  Example: `https://jobops.dakheera47.com`
+  Example: `http://localhost:3005`
 - `DOCS_BASE_URL`: Route prefix where docs are hosted.
   Example: `/docs/`
 
 Defaults:
 
 - `DOCS_SITE_URL=http://localhost:3006` for local development (`npm run docs:dev`)
-- `DOCS_SITE_URL=https://jobops.dakheera47.com` for production builds when unset
+- `DOCS_SITE_URL=http://localhost:3005` for production builds when unset
 - `DOCS_BASE_URL=/docs/`
 
 ## Versioning

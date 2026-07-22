@@ -16,7 +16,7 @@ function isSitemapItem(value: unknown): value is SitemapItem {
   return typeof maybeItem.url === "string";
 }
 
-const productionSiteUrl = "https://jobops.dakheera47.com";
+const productionSiteUrl = "http://localhost:3005";
 const siteUrl =
   process.env.DOCS_SITE_URL ??
   (process.env.NODE_ENV === "development"
@@ -56,7 +56,7 @@ const config: Config = {
       defaultWebsiteId: "a3d08b50-443f-4d21-8ebb-9355ba67578b",
       demoWebsiteId: "7956a54d-63f5-4528-af0f-f823dd421752",
       proxyBasePath: "/stats",
-      upstreamOrigin: "https://umami.dakheera47.com",
+      upstreamOrigin: "http://localhost",
       standaloneDevPort: "3006",
     },
   },
@@ -82,7 +82,8 @@ const config: Config = {
         docs: {
           routeBasePath: "/",
           sidebarPath: "./sidebars.ts",
-          editUrl: "https://github.com/DaKheera47/job-ops/tree/main/docs-site/",
+          editUrl:
+            "https://github.com/Proga97/job_search_AI/tree/main/docs-site/",
           showLastUpdateAuthor: false,
           showLastUpdateTime: true,
         },
@@ -145,7 +146,7 @@ const config: Config = {
         {
           type: "html",
           value:
-            '<a class="navbar__item navbar__link" href="https://github.com/DaKheera47/job-ops" data-umami-event="docs_github_click">GitHub</a>',
+            '<a class="navbar__item navbar__link" href="https://github.com/Proga97/job_search_AI" data-umami-event="docs_github_click">GitHub</a>',
           position: "right",
         },
       ],
@@ -171,11 +172,11 @@ const config: Config = {
           items: [
             {
               label: "Repository",
-              href: "https://github.com/DaKheera47/job-ops",
+              href: "https://github.com/Proga97/job_search_AI",
             },
             {
               label: "Issues",
-              href: "https://github.com/DaKheera47/job-ops/issues",
+              href: "https://github.com/Proga97/job_search_AI/issues",
             },
           ],
         },

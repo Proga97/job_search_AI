@@ -14,7 +14,7 @@ When enabled for a job, Meow AI rewrites eligible outbound RxResume links to you
 Examples:
 
 - original: `https://github.com/yourname`
-- traced: `https://jobops.dakheera47.com/cv/amazon-de`
+- traced: `http://localhost:3005/cv/amazon-de`
 
 Format details:
 

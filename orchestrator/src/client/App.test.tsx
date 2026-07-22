@@ -72,7 +72,7 @@ describe("App demo banner", () => {
     localStorage.clear();
   });
 
-  it("shows a waitlist link in demo mode", () => {
+  it("shows local-only information in demo mode", () => {
     vi.mocked(useDemoInfo).mockReturnValue({
       demoMode: true,
       resetCadenceHours: 6,
@@ -88,11 +88,8 @@ describe("App demo banner", () => {
       </MemoryRouter>,
     );
 
-    const link = screen.getByRole("link", { name: "Join the waitlist." });
-    expect(link).toHaveAttribute(
-      "href",
-      "https://try.jobops.app?utm_source=demo&utm_medium=banner&utm_campaign=waitlist",
-    );
+    expect(screen.getByText(/Demo data is temporary/)).toBeInTheDocument();
+    expect(screen.queryByRole("link")).toBeNull();
   });
 
   it("does not render the demo banner waitlist link when demo mode is disabled", () => {
@@ -111,7 +108,7 @@ describe("App demo banner", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.queryByRole("link", { name: "try.jobops.app" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "localhost" })).toBeNull();
   });
 
   it("does not fetch demo info while rendering the sign-in page", () => {
@@ -147,7 +144,7 @@ describe("App demo banner", () => {
       screen.getByRole("button", { name: /dismiss demo waitlist banner/i }),
     );
 
-    expect(screen.queryByRole("link", { name: "try.jobops.app" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "localhost" })).toBeNull();
     expect(localStorage.getItem("jobops.demoWaitlistBannerDismissed")).toBe(
       "1",
     );

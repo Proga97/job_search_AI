@@ -3,7 +3,7 @@ export const DEFAULT_DOCS_UMAMI_WEBSITE_ID =
 export const DEMO_DOCS_UMAMI_WEBSITE_ID =
   "7956a54d-63f5-4528-af0f-f823dd421752";
 export const UMAMI_PROXY_BASE_PATH = "/stats";
-export const UMAMI_UPSTREAM_ORIGIN = "https://umami.dakheera47.com";
+export const UMAMI_UPSTREAM_ORIGIN = "http://localhost";
 export const DOCS_STANDALONE_DEV_PORT = "3006";
 const JOBOPS_UMAMI_SCRIPT_SELECTOR = 'script[data-jobops-umami="docs"]';
 

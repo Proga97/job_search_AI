@@ -28,15 +28,15 @@ Use the path that matches your change:
 
 | Path | Main folders | Start command(s) | Canonical docs |
 | --- | --- | --- | --- |
-| Docs/content | `docs-site/docs` | `npm run docs:dev` | [Docs style guide](https://jobops.dakheera47.com/docs/next/reference/documentation-style-guide), [FAQ](https://jobops.dakheera47.com/docs/next/reference/faq) |
-| App/UI/API | `orchestrator`, `shared` | `npm --workspace orchestrator run dev` | [Self-hosting](https://jobops.dakheera47.com/docs/getting-started/self-hosting), [Troubleshooting](https://jobops.dakheera47.com/docs/next/troubleshooting/common-problems) |
-| Watchlist source adapters | `orchestrator/src/server/watchlist/adapters`, `orchestrator/src/server/config` | `npm --workspace orchestrator run dev` | [Watchlist](https://jobops.dakheera47.com/docs/next/features/watchlist) |
-| Extractors | `extractors/*`, sometimes `shared` | Relevant type checks + tests | [Add an extractor](https://jobops.dakheera47.com/docs/next/workflows/add-an-extractor), [Extractors overview](https://jobops.dakheera47.com/docs/extractors/overview) |
-| Typst resume themes | `orchestrator/src/server/services/resume-renderer/typst-themes` | `npm run typst-theme:validate` | [Reactive Resume](https://jobops.dakheera47.com/docs/features/reactive-resume) |
+| Docs/content | `docs-site/docs` | `npm run docs:dev` | [Docs style guide](http://localhost:3005/docs/next/reference/documentation-style-guide), [FAQ](http://localhost:3005/docs/next/reference/faq) |
+| App/UI/API | `orchestrator`, `shared` | `npm --workspace orchestrator run dev` | [Self-hosting](http://localhost:3005/docs/getting-started/self-hosting), [Troubleshooting](http://localhost:3005/docs/next/troubleshooting/common-problems) |
+| Watchlist source adapters | `orchestrator/src/server/watchlist/adapters`, `orchestrator/src/server/config` | `npm --workspace orchestrator run dev` | [Watchlist](http://localhost:3005/docs/next/features/watchlist) |
+| Extractors | `extractors/*`, sometimes `shared` | Relevant type checks + tests | [Add an extractor](http://localhost:3005/docs/next/workflows/add-an-extractor), [Extractors overview](http://localhost:3005/docs/extractors/overview) |
+| Typst resume themes | `orchestrator/src/server/services/resume-renderer/typst-themes` | `npm run typst-theme:validate` | [Reactive Resume](http://localhost:3005/docs/features/reactive-resume) |
 
 ## Local Setup (Minimal)
 
-For full end-user setup, environment variables, OAuth, and deployment details, use the [Self-Hosting Guide](https://jobops.dakheera47.com/docs/getting-started/self-hosting) and [Gmail OAuth Setup](https://jobops.dakheera47.com/docs/getting-started/gmail-oauth-setup).
+For full end-user setup, environment variables, OAuth, and deployment details, use the [Self-Hosting Guide](http://localhost:3005/docs/getting-started/self-hosting) and [Gmail OAuth Setup](http://localhost:3005/docs/getting-started/gmail-oauth-setup).
 
 Contributor baseline from repo root:
 
@@ -203,10 +203,10 @@ Before editing server routes/services, read [`AGENTS.md`](./AGENTS.md) for repos
 
 ## Where to Find Deeper Docs
 
-- [Documentation Home](https://jobops.dakheera47.com/docs/)
-- [Self-Hosting Guide](https://jobops.dakheera47.com/docs/getting-started/self-hosting)
-- [Gmail OAuth Setup](https://jobops.dakheera47.com/docs/getting-started/gmail-oauth-setup)
-- [Documentation Style Guide](https://jobops.dakheera47.com/docs/next/reference/documentation-style-guide)
-- [FAQ (includes where to edit docs)](https://jobops.dakheera47.com/docs/next/reference/faq)
-- [Add an Extractor Workflow](https://jobops.dakheera47.com/docs/next/workflows/add-an-extractor)
-- [Troubleshooting](https://jobops.dakheera47.com/docs/next/troubleshooting/common-problems)
+- [Documentation Home](http://localhost:3005/docs/)
+- [Self-Hosting Guide](http://localhost:3005/docs/getting-started/self-hosting)
+- [Gmail OAuth Setup](http://localhost:3005/docs/getting-started/gmail-oauth-setup)
+- [Documentation Style Guide](http://localhost:3005/docs/next/reference/documentation-style-guide)
+- [FAQ (includes where to edit docs)](http://localhost:3005/docs/next/reference/faq)
+- [Add an Extractor Workflow](http://localhost:3005/docs/next/workflows/add-an-extractor)
+- [Troubleshooting](http://localhost:3005/docs/next/troubleshooting/common-problems)

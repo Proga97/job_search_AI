@@ -22,15 +22,15 @@ describe("docs umami", () => {
     });
 
     expect(config.websiteId).toBe(DEFAULT_DOCS_UMAMI_WEBSITE_ID);
-    expect(config.scriptSrc).toBe("https://umami.dakheera47.com/script.js");
-    expect(config.hostUrl).toBe("https://umami.dakheera47.com");
+    expect(config.scriptSrc).toBe("http://localhost/script.js");
+    expect(config.hostUrl).toBe("http://localhost");
   });
 
   it("uses the proxy path and demo website id when demo mode is enabled", () => {
     const config = resolveDocsUmamiConfig({
       demoMode: true,
       location: {
-        hostname: "jobops.dakheera47.com",
+        hostname: "localhost",
         port: "",
       },
     });

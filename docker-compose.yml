@@ -9,7 +9,7 @@ services:
       dockerfile: Dockerfile
       secrets:
         - github_token
-    image: ghcr.io/dakheera47/job-ops:latest
+    image: meow-ai:latest
     container_name: meow-ai
     ports:
       - "3005:3001"

@@ -1,6 +1,6 @@
 declare const __APP_VERSION__: string;
 
-export const GITHUB_REPO = "DaKheera47/job-ops";
+export const GITHUB_REPO = "Proga97/job_search_AI";
 const STORAGE_KEY = "jobops_version_check";
 const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
 

@@ -73,5 +73,5 @@ When adding user-visible behavior:
 
 ## Support
 
-- Open an [issue](https://github.com/DaKheera47/job-ops/issues) for documentation errors.
+- Open an [issue](https://github.com/Proga97/job_search_AI/issues) for documentation errors.
 - Check these docs before opening support requests.

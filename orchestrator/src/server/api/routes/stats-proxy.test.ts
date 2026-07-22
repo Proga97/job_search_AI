@@ -23,7 +23,7 @@ describe.sequential("Stats proxy routes", () => {
     const mockFetch = vi.fn(
       async (input: URL | RequestInfo, init?: RequestInit) => {
         const url = typeof input === "string" ? input : input.toString();
-        if (url === "https://umami.dakheera47.com/script.js") {
+        if (url === "http://localhost/script.js") {
           expect(init?.method).toBe("GET");
           return new Response(gzipSync("console.log('umami')"), {
             status: 200,
@@ -55,7 +55,7 @@ describe.sequential("Stats proxy routes", () => {
     const mockFetch = vi.fn(
       async (input: URL | RequestInfo, init?: RequestInit) => {
         const url = typeof input === "string" ? input : input.toString();
-        if (url === "https://umami.dakheera47.com/api/send?foo=bar") {
+        if (url === "http://localhost/api/send?foo=bar") {
           expect(init?.method).toBe("POST");
           expect(init?.headers).toBeInstanceOf(Headers);
           const headers = init?.headers as Headers;
@@ -100,7 +100,7 @@ describe.sequential("Stats proxy routes", () => {
 
     expect(response.status).toBe(404);
     expect(mockFetch).not.toHaveBeenCalledWith(
-      "https://umami.dakheera47.com/",
+      "http://localhost/",
       expect.anything(),
     );
   });
@@ -122,7 +122,7 @@ describe.sequential("Stats proxy routes", () => {
     expect(response.headers.get("allow")).toBe("GET, HEAD");
     expect(await response.text()).toBe("Method not allowed");
     expect(mockFetch).not.toHaveBeenCalledWith(
-      "https://umami.dakheera47.com/script.js",
+      "http://localhost/script.js",
       expect.anything(),
     );
   });
@@ -132,7 +132,7 @@ describe.sequential("Stats proxy routes", () => {
     const mockFetch = vi.fn(
       async (input: URL | RequestInfo, init?: RequestInit) => {
         const url = typeof input === "string" ? input : input.toString();
-        if (url === "https://umami.dakheera47.com/script.js") {
+        if (url === "http://localhost/script.js") {
           throw new Error("upstream down");
         }
         return realFetch(input, init);
@@ -151,7 +151,7 @@ describe.sequential("Stats proxy routes", () => {
     const mockFetch = vi.fn(
       async (input: URL | RequestInfo, init?: RequestInit) => {
         const url = typeof input === "string" ? input : input.toString();
-        if (url === "https://umami.dakheera47.com/script.js") {
+        if (url === "http://localhost/script.js") {
           return await new Promise<Response>((_resolve, reject) => {
             init?.signal?.addEventListener("abort", () => {
               reject(
@@ -184,7 +184,7 @@ describe.sequential("Stats proxy routes", () => {
     const mockFetch = vi.fn(
       async (input: URL | RequestInfo, init?: RequestInit) => {
         const url = typeof input === "string" ? input : input.toString();
-        if (url === "https://umami.dakheera47.com/script.js") {
+        if (url === "http://localhost/script.js") {
           return new Response("ok", {
             status: 200,
             headers: { "content-type": "application/javascript" },
@@ -205,7 +205,7 @@ describe.sequential("Stats proxy routes", () => {
     const mockFetch = vi.fn(
       async (input: URL | RequestInfo, init?: RequestInit) => {
         const url = typeof input === "string" ? input : input.toString();
-        if (url === "https://umami.dakheera47.com/script.js") {
+        if (url === "http://localhost/script.js") {
           return new Response("ok", {
             status: 200,
             headers: { "content-type": "application/javascript" },
