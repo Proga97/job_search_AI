@@ -2,9 +2,8 @@
  * Express app factory (useful for tests).
  */
 
-import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { dirname, extname, join } from "node:path";
+import { dirname, join } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import type { ReadableStream as NodeReadableStream } from "node:stream/web";
@@ -562,33 +561,6 @@ export function createApp() {
 
   // Serve client app in production
   if (process.env.NODE_ENV === "production") {
-    const packagedDocsDir = join(__dirname, "../../dist/docs");
-    const workspaceDocsDir = join(__dirname, "../../../docs-site/build");
-    const docsDir = existsSync(packagedDocsDir)
-      ? packagedDocsDir
-      : workspaceDocsDir;
-    const docsIndexPath = join(docsDir, "index.html");
-    let cachedDocsIndexHtml: string | null = null;
-
-    if (existsSync(docsIndexPath)) {
-      app.use("/docs", express.static(docsDir));
-      app.get("/docs/*", async (req, res, next) => {
-        if (!req.accepts("html")) {
-          next();
-          return;
-        }
-        if (extname(req.path)) {
-          next();
-          return;
-        }
-        if (!cachedDocsIndexHtml) {
-          cachedDocsIndexHtml = await readFile(docsIndexPath, "utf-8");
-        }
-        res.setHeader("Content-Type", "text/html; charset=utf-8");
-        res.send(renderHtmlWithAnalyticsConfig(cachedDocsIndexHtml));
-      });
-    }
-
     const clientDir = join(__dirname, "../../dist/client");
     app.use(express.static(clientDir));
 

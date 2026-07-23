@@ -44,8 +44,6 @@ export default defineConfig({
     include: [
       "src/**/*.test.ts",
       "src/**/*.test.tsx",
-      "../docs-site/src/**/*.test.ts",
-      "../docs-site/src/**/*.test.tsx",
       "../career-boards/**/*.test.ts",
       "../shared/src/**/*.test.ts",
       "../extractors/**/tests/**/*.test.ts",

@@ -28,7 +28,6 @@ Use the path that matches your change:
 
 | Path | Main folders | Start command(s) | Canonical docs |
 | --- | --- | --- | --- |
-| Docs/content | `docs-site/docs` | `npm run docs:dev` | [Docs style guide](http://localhost:3005/docs/next/reference/documentation-style-guide), [FAQ](http://localhost:3005/docs/next/reference/faq) |
 | App/UI/API | `orchestrator`, `shared` | `npm --workspace orchestrator run dev` | [Self-hosting](http://localhost:3005/docs/getting-started/self-hosting), [Troubleshooting](http://localhost:3005/docs/next/troubleshooting/common-problems) |
 | Watchlist source adapters | `orchestrator/src/server/watchlist/adapters`, `orchestrator/src/server/config` | `npm --workspace orchestrator run dev` | [Watchlist](http://localhost:3005/docs/next/features/watchlist) |
 | Extractors | `extractors/*`, sometimes `shared` | Relevant type checks + tests | [Add an extractor](http://localhost:3005/docs/next/workflows/add-an-extractor), [Extractors overview](http://localhost:3005/docs/extractors/overview) |

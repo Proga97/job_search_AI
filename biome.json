@@ -9,8 +9,6 @@
     "includes": [
       "**",
       "!!**/dist",
-      "!!docs-site/.docusaurus",
-      "!!docs-site/build",
       "!!**/.venv",
       "!!.claude",
       "!!data",

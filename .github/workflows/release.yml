@@ -93,20 +93,6 @@ jobs:
           RELEASE_VERSION: ${{ inputs.version }}
         run: node ./scripts/set-orchestrator-version.mjs "$RELEASE_VERSION"
 
-      - name: Generate docs version
-        if: steps.validate.outputs.version_already_set != 'true'
-        env:
-          RELEASE_VERSION: ${{ inputs.version }}
-        run: npm run docs:version -- "$RELEASE_VERSION"
-
-      - name: Format generated docs files
-        if: steps.validate.outputs.version_already_set != 'true'
-        run: |
-          ./orchestrator/node_modules/.bin/biome check --write \
-            docs-site/versions.json \
-            docs-site/versioned_docs \
-            docs-site/versioned_sidebars
-
       - name: Commit and push version bump
         if: steps.validate.outputs.version_already_set != 'true'
         env:
@@ -117,10 +103,7 @@ jobs:
 
           git add \
             orchestrator/package.json \
-            package-lock.json \
-            docs-site/versions.json \
-            docs-site/versioned_docs \
-            docs-site/versioned_sidebars
+            package-lock.json
           git commit -m "chore: release $RELEASE_VERSION"
           git push origin HEAD:main
 

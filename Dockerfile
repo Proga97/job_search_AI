@@ -72,7 +72,6 @@ ARG BUILDARCH
 
 # Copy package files for dependency installation.
 COPY package*.json ./
-COPY docs-site/package*.json ./docs-site/
 COPY shared/package*.json ./shared/
 COPY orchestrator/package*.json ./orchestrator/
 COPY career-boards/bamboohr/package*.json ./career-boards/bamboohr/
@@ -101,7 +100,6 @@ RUN --mount=type=cache,id=npm-build-${BUILDARCH},target=/root/.npm \
 FROM node-deps AS build-sources
 
 COPY shared ./shared
-COPY docs-site ./docs-site
 COPY orchestrator ./orchestrator
 COPY career-boards/bamboohr ./career-boards/bamboohr
 COPY career-boards/greenhouse ./career-boards/greenhouse
@@ -123,13 +121,8 @@ COPY extractors/wazzuf ./extractors/wazzuf
 COPY extractors/browser-utils ./extractors/browser-utils
 
 # ============================================================================
-# PARALLEL BUILD STAGES
+# CLIENT BUILD STAGE
 # ============================================================================
-FROM build-sources AS docs-build
-
-WORKDIR /app/docs-site
-RUN npm run build
-
 FROM build-sources AS client-build
 
 WORKDIR /app/orchestrator
@@ -149,7 +142,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copy package files for production dependency installation.
 COPY package*.json ./
-COPY docs-site/package*.json ./docs-site/
 COPY shared/package*.json ./shared/
 COPY orchestrator/package*.json ./orchestrator/
 COPY career-boards/bamboohr/package*.json ./career-boards/bamboohr/
@@ -252,7 +244,6 @@ COPY --from=camoufox-cache /root/.cache/camoufox /root/.cache/camoufox
 
 # Copy built assets and runtime source code.
 COPY --from=client-build /app/orchestrator/dist ./orchestrator/dist
-COPY --from=docs-build /app/docs-site/build ./orchestrator/dist/docs
 COPY shared ./shared
 COPY orchestrator ./orchestrator
 COPY career-boards/bamboohr ./career-boards/bamboohr
