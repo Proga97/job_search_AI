@@ -27,6 +27,15 @@ Start the owner's installation with the issuer override:
 docker compose -f docker-compose.yml -f docker-compose.issuer.yml up -d
 ```
 
+For owner development with live reload, include both overrides:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.issuer.yml up -d --build
+```
+
+Ordinary installations must not use `docker-compose.issuer.yml`; they can run
+`docker compose up -d --build` without any owner secrets.
+
 Sign in as the system administrator, open **Settings → Access Licenses**, enter a username and expiration date, and select **Generate token**. Copy the resulting token to the intended user.
 
 The user starts their local Meow AI installation, enters the same username on the activation screen, and pastes the token. The validated token is stored in their persistent `data/` directory.

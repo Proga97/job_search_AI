@@ -13,8 +13,6 @@ services:
       PORT: 3001
       APPLY_ASSISTANT_URL: ${APPLY_ASSISTANT_URL:-http://host.docker.internal:4317}
       APPLY_ASSISTANT_TOKEN: ${APPLY_ASSISTANT_TOKEN:-}
-      MEOW_AI_LICENSE_PRIVATE_KEY_PATH: /run/secrets/meow-ai-license-private.pem
-      MEOW_AI_OWNER_TOKEN_PATH: /run/secrets/meow-ai-owner-token
     ports:
       - "5173:5173"
     volumes:
@@ -26,8 +24,6 @@ services:
       - ./extractors:/app/extractors
       - ./data:/app/data
       - codex-home:/app/codex-home
-      - ./.license-private/license-private.pem:/run/secrets/meow-ai-license-private.pem:ro
-      - ./.license-private/owner-token:/run/secrets/meow-ai-owner-token:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
       interval: 10s
