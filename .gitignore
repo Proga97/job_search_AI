@@ -1,6 +1,26 @@
 # Environment files
 .env
+.env.*
 *.env.local
+!.env.example
+!**/.env.example
+
+# Secrets and private keys
+.license-private/
+*.private.pem
+*-private.pem
+*.key
+*.p12
+*.pfx
+
+# Local databases and persisted state
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite3
 
 # Dependencies
 node_modules/
@@ -23,12 +43,24 @@ extractors/ukvisajobs/storage/
 .DS_Store
 Thumbs.db
 
-# local temp artifacts
+# Local temp artifacts and logs
 tmp/
+temp/
+*.tmp
+*.log
+npm-debug.log*
 
 # Virtual environment for Python
 .venv
+**/__pycache__/
+*.pyc
 
 # Runtime storage artifacts
 orchestrator/storage
 apply-assistant/.data/
+
+# Test and build reports
+coverage/
+.nyc_output/
+playwright-report/
+test-results/

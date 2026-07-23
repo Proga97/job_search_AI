@@ -25,3 +25,7 @@ Application data is persisted in the repository's `data/` directory. Back up tha
 Meow AI is maintained by Pranay Chimmani.
 
 Third-party packages, services, templates, and embedded components remain subject to their respective terms and license notices.
+
+## Offline access licenses
+
+The owner installation can issue username-bound, expiring access tokens from **Settings → Access Licenses**. The private Ed25519 issuer key is stored in the ignored `.license-private/` directory and must never be distributed or included in a friend-facing image.

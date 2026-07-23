@@ -13,7 +13,25 @@ data/
 # Environment files (passed via docker-compose)
 .env
 **/.env
+**/.env.*
 **/.env.local
+
+# Owner-only signing keys must never enter the Docker build context
+.license-private/
+**/*.private.pem
+**/*-private.pem
+**/*.key
+**/*.p12
+**/*.pfx
+
+# Local databases and persisted state
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/*.sqlite
+**/*.sqlite-shm
+**/*.sqlite-wal
+**/*.sqlite3
 
 # Git
 .git

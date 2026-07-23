@@ -9,7 +9,7 @@ import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import type { ReadableStream as NodeReadableStream } from "node:stream/web";
 import { fileURLToPath } from "node:url";
-import { unauthorized } from "@infra/errors";
+import { forbidden, unauthorized } from "@infra/errors";
 import {
   apiErrorHandler,
   fail,
@@ -24,6 +24,7 @@ import { getJobOpsAppConfig } from "@server/config/app-mode";
 import { isDemoMode } from "@server/config/demo";
 import * as usersRepo from "@server/repositories/users";
 import { proxyChallengeViewerRequest } from "@server/services/challenge-viewer";
+import { getLicenseStatus } from "@server/services/license";
 import { DEFAULT_TENANT_ID } from "@server/tenancy/constants";
 import cors from "cors";
 import express from "express";
@@ -196,6 +197,12 @@ export function createAuthGuard() {
     // Explicitly allowed public API routes
     if (normalizedPath === "/api/demo/info") return true;
     if (normalizedPath === "/api/app/status") return true;
+    if (normalizedPath === "/api/license/status") return true;
+    if (
+      normalizedMethod === "POST" &&
+      normalizedPath === "/api/license/activate"
+    )
+      return true;
     if (normalizedPath === "/api/profile/status") return true;
     if (
       normalizedMethod === "POST" &&
@@ -430,6 +437,25 @@ export function createApp() {
         durationMs: duration,
       });
     });
+    next();
+  });
+
+  // Offline activation is enforced before authentication. Only the activation
+  // endpoints remain reachable on an unlicensed installation.
+  app.use("/api", async (req, res, next) => {
+    if (process.env.NODE_ENV === "test") {
+      next();
+      return;
+    }
+    if (req.path === "/license/status" || req.path === "/license/activate") {
+      next();
+      return;
+    }
+    const status = await getLicenseStatus();
+    if (!status.active) {
+      fail(res, forbidden("Meow AI activation is required"));
+      return;
+    }
     next();
   });
 

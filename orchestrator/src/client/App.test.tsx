@@ -5,6 +5,20 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 import { useDemoInfo } from "./hooks/useDemoInfo";
 
+vi.mock("./api", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./api")>();
+  return {
+    ...actual,
+    getLicenseStatus: vi.fn().mockResolvedValue({
+      active: true,
+      issuerMode: false,
+      license: null,
+      reason: null,
+    }),
+    getJobs: vi.fn().mockResolvedValue({ total: 0 }),
+  };
+});
+
 vi.mock("./hooks/useDemoInfo", () => ({
   useDemoInfo: vi.fn(),
 }));
@@ -72,7 +86,7 @@ describe("App demo banner", () => {
     localStorage.clear();
   });
 
-  it("shows local-only information in demo mode", () => {
+  it("shows local-only information in demo mode", async () => {
     vi.mocked(useDemoInfo).mockReturnValue({
       demoMode: true,
       resetCadenceHours: 6,
@@ -88,7 +102,9 @@ describe("App demo banner", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText(/Demo data is temporary/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/Demo data is temporary/),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("link")).toBeNull();
   });
 
@@ -111,7 +127,7 @@ describe("App demo banner", () => {
     expect(screen.queryByRole("link", { name: "localhost" })).toBeNull();
   });
 
-  it("does not fetch demo info while rendering the sign-in page", () => {
+  it("does not fetch demo info while rendering the sign-in page", async () => {
     vi.mocked(useDemoInfo).mockReturnValue(null);
 
     render(
@@ -120,11 +136,11 @@ describe("App demo banner", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("sign-in")).toBeInTheDocument();
+    expect(await screen.findByText("sign-in")).toBeInTheDocument();
     expect(useDemoInfo).toHaveBeenCalledWith({ enabled: false });
   });
 
-  it("lets the user dismiss the waitlist banner and keeps it hidden", () => {
+  it("lets the user dismiss the waitlist banner and keeps it hidden", async () => {
     vi.mocked(useDemoInfo).mockReturnValue({
       demoMode: true,
       resetCadenceHours: 6,
@@ -141,7 +157,9 @@ describe("App demo banner", () => {
     );
 
     fireEvent.click(
-      screen.getByRole("button", { name: /dismiss demo waitlist banner/i }),
+      await screen.findByRole("button", {
+        name: /dismiss demo waitlist banner/i,
+      }),
     );
 
     expect(screen.queryByRole("link", { name: "localhost" })).toBeNull();
@@ -150,7 +168,7 @@ describe("App demo banner", () => {
     );
   });
 
-  it("renders the neutral Resume Studio route", () => {
+  it("renders the neutral Resume Studio route", async () => {
     vi.mocked(useDemoInfo).mockReturnValue({
       demoMode: false,
       resetCadenceHours: 6,
@@ -166,6 +184,6 @@ describe("App demo banner", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("design-resume-page")).toBeInTheDocument();
+    expect(await screen.findByText("design-resume-page")).toBeInTheDocument();
   });
 });

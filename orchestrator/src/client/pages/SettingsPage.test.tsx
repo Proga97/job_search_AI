@@ -16,6 +16,12 @@ const render = (ui: Parameters<typeof renderWithQueryClient>[0]) =>
 
 vi.mock("../api", () => ({
   getAppStatus: vi.fn(),
+  getLicenseStatus: vi.fn().mockResolvedValue({
+    active: true,
+    issuerMode: false,
+    license: null,
+    reason: null,
+  }),
   getSettings: vi.fn(),
   getLlmModels: vi.fn().mockResolvedValue([]),
   getCodexAuthStatus: vi.fn().mockResolvedValue({

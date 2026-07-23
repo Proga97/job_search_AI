@@ -20,6 +20,7 @@ import { OnboardingGate } from "./components/OnboardingGate";
 import { useAnalyticsIdentity } from "./hooks/useAnalyticsIdentity";
 import { useDemoInfo } from "./hooks/useDemoInfo";
 import { setAuthNavigator } from "./lib/auth-navigation";
+import { ActivationPage } from "./pages/ActivationPage";
 import { DesignResumePage } from "./pages/DesignResumePage";
 import { GmailOauthCallbackPage } from "./pages/GmailOauthCallbackPage";
 import { HomePage } from "./pages/HomePage";
@@ -94,6 +95,26 @@ export const App: React.FC = () => {
         return false;
       }
     });
+  const [licenseActive, setLicenseActive] = useState<boolean | null>(null);
+  const [licenseError, setLicenseError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    api
+      .getLicenseStatus()
+      .then((status) => {
+        if (active) setLicenseActive(status.active);
+      })
+      .catch((error) => {
+        if (!active) return;
+        setLicenseError(
+          error instanceof Error ? error.message : "Unable to check activation",
+        );
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Determine a stable key for transitions to avoid unnecessary unmounts when switching sub-tabs
   const pageKey = React.useMemo(() => {
@@ -123,6 +144,28 @@ export const App: React.FC = () => {
       setAuthNavigator(null);
     };
   }, [navigate]);
+
+  if (licenseError) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
+        <div>
+          <h1 className="text-xl font-semibold">
+            Activation check unavailable
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">{licenseError}</p>
+          <Button className="mt-5" onClick={() => window.location.reload()}>
+            Try again
+          </Button>
+        </div>
+      </main>
+    );
+  }
+
+  if (licenseActive === false) {
+    return <ActivationPage onActivated={() => window.location.reload()} />;
+  }
+
+  if (licenseActive === null) return null;
 
   return (
     <>

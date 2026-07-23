@@ -23,6 +23,7 @@ import { ChatSettingsSection } from "@client/pages/settings/components/ChatSetti
 import { DangerZoneSection } from "@client/pages/settings/components/DangerZoneSection";
 import { DisplaySettingsSection } from "@client/pages/settings/components/DisplaySettingsSection";
 import { EnvironmentSettingsSection } from "@client/pages/settings/components/EnvironmentSettingsSection";
+import { LicenseManagerSection } from "@client/pages/settings/components/LicenseManagerSection";
 import { ModelSettingsSection } from "@client/pages/settings/components/ModelSettingsSection";
 import { PromptTemplatesSection } from "@client/pages/settings/components/PromptTemplatesSection";
 import { ReactiveResumeSection } from "@client/pages/settings/components/ReactiveResumeSection";
@@ -148,6 +149,7 @@ type SettingsSectionId =
   | "webhooks"
   | "tracer-links"
   | "environment"
+  | "licenses"
   | "display"
   | "backup"
   | "danger-zone";
@@ -254,7 +256,13 @@ const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
         id: "environment",
         label: "Workspace Access",
         description: "Service credentials and authentication protection.",
-        searchTerms: ["security", "auth", "adzuna", "ukvisajobs"],
+        searchTerms: ["security", "auth", "adzuna"],
+      },
+      {
+        id: "licenses",
+        label: "Access Licenses",
+        description: "Issue and renew offline access tokens.",
+        searchTerms: ["license", "access", "token", "expiry", "users"],
       },
     ],
   },
@@ -355,6 +363,7 @@ const SECTION_FIELD_MAP: Record<
     "adzunaAppId",
     "adzunaAppKey",
   ],
+  licenses: [],
   display: [
     "showSponsorInfo",
     "autoRefreshJobsEnabled",
@@ -876,6 +885,10 @@ export const SettingsPage: React.FC = () => {
     queryKey: queryKeys.app.status(),
     queryFn: api.getAppStatus,
   });
+  const licenseStatusQuery = useQuery({
+    queryKey: ["license-status"],
+    queryFn: api.getLicenseStatus,
+  });
   const backupsQuery = useQuery({
     queryKey: queryKeys.backups.list(),
     queryFn: api.getBackups,
@@ -887,6 +900,7 @@ export const SettingsPage: React.FC = () => {
   const isLoadingBackups = backupsQuery.isLoading;
   const canEditLlmSettings =
     appStatusQuery.data?.capabilities.userEditableLlmSettings ?? true;
+  const canManageLicenses = licenseStatusQuery.data?.issuerMode === true;
   useQueryErrorToast(appStatusQuery.error, "Failed to load app status");
   useQueryErrorToast(backupsQuery.error, "Failed to load backups");
 
@@ -1495,11 +1509,13 @@ export const SettingsPage: React.FC = () => {
     () =>
       SETTINGS_NAV_GROUPS.map((group) => ({
         ...group,
-        items: group.items.filter(
-          (item) => canEditLlmSettings || item.id !== "model",
-        ),
+        items: group.items.filter((item) => {
+          if (!canEditLlmSettings && item.id === "model") return false;
+          if (!canManageLicenses && item.id === "licenses") return false;
+          return true;
+        }),
       })).filter((group) => group.items.length > 0),
-    [canEditLlmSettings],
+    [canEditLlmSettings, canManageLicenses],
   );
 
   const filteredNavGroups = useMemo(
@@ -1731,6 +1747,9 @@ export const SettingsPage: React.FC = () => {
         />
       );
       break;
+    case "licenses":
+      activeSectionContent = <LicenseManagerSection />;
+      break;
     case "display":
       activeSectionContent = (
         <DisplaySettingsSection
@@ -1811,36 +1830,38 @@ export const SettingsPage: React.FC = () => {
                 : null
             }
             actions={
-              <>
-                {activeSectionIsDirty ? (
+              activeSection === "licenses" ? null : (
+                <>
+                  {activeSectionIsDirty ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="whitespace-nowrap"
+                      onClick={handleDiscardChanges}
+                      disabled={isLoading || isSaving || !isDirty}
+                    >
+                      Discard changes
+                    </Button>
+                  ) : null}
                   <Button
                     type="button"
                     variant="outline"
                     className="whitespace-nowrap"
-                    onClick={handleDiscardChanges}
-                    disabled={isLoading || isSaving || !isDirty}
+                    onClick={handleReset}
+                    disabled={isLoading || isSaving || !settings}
                   >
-                    Discard changes
+                    Reset to defaults
                   </Button>
-                ) : null}
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="whitespace-nowrap"
-                  onClick={handleReset}
-                  disabled={isLoading || isSaving || !settings}
-                >
-                  Reset to defaults
-                </Button>
-                <Button
-                  type="button"
-                  className="whitespace-nowrap"
-                  onClick={handleSubmit(onSave)}
-                  disabled={isLoading || isSaving || !canSave}
-                >
-                  {isSaving ? "Saving..." : "Save changes"}
-                </Button>
-              </>
+                  <Button
+                    type="button"
+                    className="whitespace-nowrap"
+                    onClick={handleSubmit(onSave)}
+                    disabled={isLoading || isSaving || !canSave}
+                  >
+                    {isSaving ? "Saving..." : "Save changes"}
+                  </Button>
+                </>
+              )
             }
             footer={
               Object.keys(errors).length > 0 ? (
