@@ -112,7 +112,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   };
 
   return (
-    <header className="liquid-glass sticky top-3 z-40 mx-auto mt-3 w-[calc(100%-1.5rem)] max-w-[1440px] rounded-[1.4rem] lg:w-[calc(100%-0.75rem)]">
+    <header className="liquid-glass sticky top-3 z-40 mx-auto mt-3 w-[calc(100%-1.5rem)] max-w-none rounded-[1.4rem] lg:w-[calc(100%-2rem)]">
       <div className="flex min-h-14 w-full flex-col gap-3 px-1.5 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4 lg:px-1">
         <div className="flex min-w-0 items-center gap-3">
           <Sheet open={navOpen} onOpenChange={setNavOpen}>
@@ -501,7 +501,7 @@ interface PageMainProps {
 export const PageMain: React.FC<PageMainProps> = ({ children, className }) => (
   <main
     className={cn(
-      "container mx-auto space-y-6 px-4 py-6 pb-16 lg:max-w-[calc((100%+64rem)/2)] lg:px-1 lg:py-8 xl:max-w-[calc((100%+80rem)/2)] 2xl:max-w-[calc((100%+96rem)/2)]",
+      "mx-auto w-full max-w-none space-y-6 px-4 py-6 pb-16 lg:px-4 lg:py-8 xl:px-6 2xl:px-8",
       className,
     )}
   >

@@ -19,11 +19,7 @@ export const OrchestratorSummary: React.FC<OrchestratorSummaryProps> = ({
         <h1 className="text-lg font-medium tracking-tight">{welcomeText}</h1>
       </div>
 
-      {isPipelineRunning && (
-        <div className="max-w-3xl">
-          <PipelineProgress isRunning={isPipelineRunning} />
-        </div>
-      )}
+      {isPipelineRunning && <PipelineProgress isRunning={isPipelineRunning} />}
     </section>
   );
 };
