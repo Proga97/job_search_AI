@@ -65,3 +65,10 @@ export async function issueLicense(input: {
   );
   return result.licensee;
 }
+
+export async function deleteLicensee(username: string): Promise<void> {
+  await fetchApi<{ username: string }>(
+    `/license/admin/licensees/${encodeURIComponent(username)}`,
+    { method: "DELETE" },
+  );
+}

@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   activateLicense,
+  deleteLicensee,
   getLicenseStatus,
   issueLicense,
   listLicensees,
@@ -85,5 +86,18 @@ describe("offline access licenses", () => {
       issuerMode: true,
       license: null,
     });
+  });
+
+  it("deletes an issued user from the owner list", async () => {
+    const expiry = new Date();
+    expiry.setUTCFullYear(expiry.getUTCFullYear() + 1);
+    await issueLicense({
+      username: "friend@example.com",
+      expiresAt: expiry.toISOString().slice(0, 10),
+    });
+
+    expect(await deleteLicensee("FRIEND@example.com")).toBe(true);
+    expect(await listLicensees()).toEqual([]);
+    expect(await deleteLicensee("friend@example.com")).toBe(false);
   });
 });

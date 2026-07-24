@@ -1,8 +1,27 @@
 import * as api from "@client/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Copy, KeyRound, RefreshCw } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Eye,
+  EyeOff,
+  KeyRound,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -25,6 +44,9 @@ export function LicenseManagerSection() {
   const [username, setUsername] = useState("");
   const [expiresAt, setExpiresAt] = useState(defaultExpiry);
   const [renewalDates, setRenewalDates] = useState<Record<string, string>>({});
+  const [revealedTokens, setRevealedTokens] = useState<Record<string, boolean>>(
+    {},
+  );
   const [latestToken, setLatestToken] = useState<api.Licensee | null>(null);
   const queryKey = useMemo(() => ["licensees"] as const, []);
   const licenseesQuery = useQuery({
@@ -42,6 +64,25 @@ export function LicenseManagerSection() {
     onError: (error) =>
       toast.error(
         error instanceof Error ? error.message : "Token generation failed",
+      ),
+  });
+  const deleteMutation = useMutation({
+    mutationFn: api.deleteLicensee,
+    onSuccess: async (_result, deletedUsername) => {
+      setLatestToken((current) =>
+        current?.username === deletedUsername ? null : current,
+      );
+      setRevealedTokens((current) => {
+        const next = { ...current };
+        delete next[deletedUsername];
+        return next;
+      });
+      await queryClient.invalidateQueries({ queryKey });
+      toast.success("Issued user removed");
+    },
+    onError: (error) =>
+      toast.error(
+        error instanceof Error ? error.message : "Unable to remove user",
       ),
   });
 
@@ -162,29 +203,120 @@ export function LicenseManagerSection() {
                     type="date"
                     aria-label={`New expiry for ${licensee.username}`}
                     value={renewalDate}
-                    onChange={(event) =>
+                    onChange={(event) => {
+                      const nextExpiry = event.currentTarget.value;
                       setRenewalDates((current) => ({
                         ...current,
-                        [licensee.username]: event.currentTarget.value,
-                      }))
-                    }
+                        [licensee.username]: nextExpiry,
+                      }));
+                    }}
                   />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    title="Issue replacement token"
-                    disabled={issueMutation.isPending}
-                    onClick={() =>
-                      issueMutation.mutate({
-                        username: licensee.username,
-                        expiresAt: renewalDate,
-                      })
-                    }
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                    <span className="sr-only">Refresh {licensee.username}</span>
-                  </Button>
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      title={
+                        revealedTokens[licensee.username]
+                          ? "Hide generated token"
+                          : "View generated token"
+                      }
+                      onClick={() =>
+                        setRevealedTokens((current) => ({
+                          ...current,
+                          [licensee.username]: !current[licensee.username],
+                        }))
+                      }
+                    >
+                      {revealedTokens[licensee.username] ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                      <span className="sr-only">
+                        {revealedTokens[licensee.username] ? "Hide" : "View"}{" "}
+                        token for {licensee.username}
+                      </span>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      title="Copy generated token"
+                      onClick={() => void copyToken(licensee.token)}
+                    >
+                      <Copy className="h-4 w-4" />
+                      <span className="sr-only">
+                        Copy token for {licensee.username}
+                      </span>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      title="Issue replacement token"
+                      disabled={issueMutation.isPending}
+                      onClick={() =>
+                        issueMutation.mutate({
+                          username: licensee.username,
+                          expiresAt: renewalDate,
+                        })
+                      }
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      <span className="sr-only">
+                        Refresh {licensee.username}
+                      </span>
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          title="Delete issued user"
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">
+                            Delete {licensee.username}
+                          </span>
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Remove {licensee.username}?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This removes the user and token from your issuer
+                            list. A token already activated on another computer
+                            remains valid until its expiry because validation is
+                            offline.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            disabled={deleteMutation.isPending}
+                            onClick={() =>
+                              deleteMutation.mutate(licensee.username)
+                            }
+                          >
+                            Delete user
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                  {revealedTokens[licensee.username] ? (
+                    <div className="min-w-0 rounded-2xl bg-muted px-4 py-3 sm:col-span-3">
+                      <p className="break-all text-xs leading-5 text-foreground">
+                        {licensee.token}
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
               );
             })

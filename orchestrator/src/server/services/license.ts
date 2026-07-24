@@ -211,6 +211,15 @@ export async function listLicensees(): Promise<Licensee[]> {
   );
 }
 
+export async function deleteLicensee(username: string): Promise<boolean> {
+  const normalized = normalizeUsername(username);
+  const licensees = await readLicensees();
+  const remaining = licensees.filter((entry) => entry.username !== normalized);
+  if (remaining.length === licensees.length) return false;
+  await writeJsonAtomic(join(getDataDir(), LICENSEES_FILENAME), remaining);
+  return true;
+}
+
 export async function issueLicense(input: {
   username: string;
   expiresAt: string;

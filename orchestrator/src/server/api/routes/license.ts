@@ -1,8 +1,9 @@
-import { badRequest, forbidden } from "@infra/errors";
+import { badRequest, forbidden, notFound } from "@infra/errors";
 import { asyncRoute, fail, ok } from "@infra/http";
 import { isSystemAdmin } from "@infra/request-context";
 import {
   activateLicense,
+  deleteLicensee,
   getLicenseStatus,
   isIssuerMode,
   issueLicense,
@@ -20,6 +21,7 @@ const issueSchema = z.object({
   username: z.string().trim().min(1).max(120),
   expiresAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 });
+const usernameParamSchema = z.string().trim().min(1).max(120);
 
 function requireIssuerAdmin(res: Response): boolean {
   if (isSystemAdmin()) return true;
@@ -54,6 +56,27 @@ licenseRouter.post(
         ),
       );
     }
+  }),
+);
+
+licenseRouter.delete(
+  "/admin/licensees/:username",
+  asyncRoute(async (req: Request, res: Response) => {
+    if (!requireIssuerAdmin(res)) return;
+    if (!(await isIssuerMode())) {
+      fail(res, forbidden("This installation is not configured as an issuer"));
+      return;
+    }
+    const parsed = usernameParamSchema.safeParse(req.params.username);
+    if (!parsed.success) {
+      fail(res, badRequest("Enter a valid username"));
+      return;
+    }
+    if (!(await deleteLicensee(parsed.data))) {
+      fail(res, notFound("Issued user was not found"));
+      return;
+    }
+    ok(res, { username: parsed.data.trim().toLowerCase() });
   }),
 );
 

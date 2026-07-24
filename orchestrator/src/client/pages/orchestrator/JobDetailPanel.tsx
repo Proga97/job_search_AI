@@ -252,8 +252,6 @@ export const JobDetailPanel: React.FC<JobDetailPanelProps> = ({
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>("brief");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
-  const [isLaunchingApplyAssistant, setIsLaunchingApplyAssistant] =
-    useState(false);
   const [isMoving, setIsMoving] = useState(false);
   const [isEditDetailsOpen, setIsEditDetailsOpen] = useState(false);
   const [catalog, setCatalog] = useState<ResumeProjectCatalogItem[]>([]);
@@ -459,25 +457,6 @@ export const JobDetailPanel: React.FC<JobDetailPanelProps> = ({
     });
   }, [selectedJob]);
 
-  const handleLaunchApplyAssistant = useCallback(async () => {
-    if (!selectedJob) return;
-    try {
-      setIsLaunchingApplyAssistant(true);
-      const result = await api.launchApplyAssistant(selectedJob.id);
-      handleJobListingOpened();
-      toast.success("Application opened for review", {
-        description:
-          result.filled > 0
-            ? `${result.filled} field${result.filled === 1 ? "" : "s"} filled. Review everything before submitting.`
-            : "No safe fields were matched. The listing is open for you to complete.",
-      });
-    } catch (error) {
-      showErrorToast(error, "Could not start Apply Assistant");
-    } finally {
-      setIsLaunchingApplyAssistant(false);
-    }
-  }, [handleJobListingOpened, selectedJob]);
-
   const handleSkip = useCallback(async () => {
     if (!selectedJob) return;
     try {
@@ -616,19 +595,32 @@ export const JobDetailPanel: React.FC<JobDetailPanelProps> = ({
           await onJobUpdated();
         }}
         scoreCTA={
-          <Button
-            size="default"
-            className="h-8 w-auto justify-center border-primary/35 bg-primary px-5 text-sm text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
-            disabled={!hasJobListing || isLaunchingApplyAssistant}
-            onClick={() => void handleLaunchApplyAssistant()}
-          >
-            {isLaunchingApplyAssistant ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Sparkles className="h-3.5 w-3.5" />
-            )}
-            {isLaunchingApplyAssistant ? "Opening…" : "Apply & Autofill"}
-          </Button>
+          hasJobListing ? (
+            <Button
+              asChild
+              size="default"
+              className="h-8 w-auto justify-center border-primary/35 bg-primary px-5 text-sm text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
+            >
+              <a
+                href={jobLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleJobListingOpened}
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                Apply
+              </a>
+            </Button>
+          ) : (
+            <Button
+              size="default"
+              className="h-8 w-auto justify-center px-5 text-sm"
+              disabled
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              Apply
+            </Button>
+          )
         }
         jobCTA={
           <div className="flex min-w-0 flex-wrap items-center gap-2 sm:shrink-0">
